@@ -13,22 +13,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.ger.gradleplayground.ui.theme.GradlePlaygroundTheme
-import com.github.venom.Venom
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var venom: Venom
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= 33) {
-            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            hasNotificationPermissionGranted = true
-        }
-        venom = Venom.createInstance(this)
-        venom.initialize()
+
         enableEdgeToEdge()
         setContent {
             GradlePlaygroundTheme {
@@ -42,9 +33,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun requestNotificationPermissionIfNeeded(showVenomNotification: () -> Unit) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            showVenomNotification()
+        }
+    }
+
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            hasNotificationPermissionGranted = isGranted
             if (!isGranted) {
                 if (Build.VERSION.SDK_INT >= 33) {
                     if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
@@ -52,10 +50,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             } else {
-                venom.start()
                 Toast.makeText(
                     applicationContext,
-                    "notification permission granted",
+                    getString(R.string.podemos_mostrar_notificaciones),
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -64,7 +61,6 @@ class MainActivity : ComponentActivity() {
 
 
     private fun showNotificationPermissionRationale() {
-
         MaterialAlertDialogBuilder(
             this,
             com.google.android.material.R.style.MaterialAlertDialog_Material3
@@ -79,7 +75,4 @@ class MainActivity : ComponentActivity() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
-    var hasNotificationPermissionGranted = false
-
 }
