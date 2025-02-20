@@ -13,13 +13,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import com.ger.gradleplayground.ui.theme.GradlePlaygroundTheme
+import com.github.venom.Venom
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var venom: Venom
+
+    private val showVenomNotification = {
+        venom.start()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        venom = Venom.createInstance(this)
+        venom.initialize()
+        requestNotificationPermissionIfNeeded(showVenomNotification)
         enableEdgeToEdge()
         setContent {
             GradlePlaygroundTheme {
@@ -50,12 +59,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             } else {
-                Toast.makeText(
-                    applicationContext,
-                    getString(R.string.podemos_mostrar_notificaciones),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+                showVenomNotification()
             }
         }
 
